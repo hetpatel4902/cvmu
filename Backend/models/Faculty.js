@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const UserSchema = new mongoose.Schema({
+const FacultySchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Please provide name"],
@@ -22,47 +22,38 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Please provide password"],
     minlength: 8,
   },
-  enrolmentNo: {
-    type: String,
-    required: [true, "Please provide enrolment number"],
-    minlength: 14,
+  collegeId: {
+    type: mongoose.Types.ObjectId,
+    ref: "College",
+    required: [true, "Please provide college"],
   },
   image: {
     type: String,
   },
-  collegeId: {
-    type: mongoose.Types.ObjectId,
-    ref: "College",
-    required: [true, "Please provide College"],
-  },
-  branchId: {
-    type: mongoose.Types.ObjectId,
-    ref: "Branch",
-    required: [true, "Please provide branch"],
-  },
-  yearId: {
-    type: mongoose.Types.ObjectId,
-    ref: "Year",
-    required: [true, "Please provide current year"],
+  description: {
+    type: String,
   },
 });
 
-UserSchema.pre("save", async function () {
+FacultySchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-UserSchema.methods.createJWT = function () {
+FacultySchema.methods.createJWT = function () {
   return jwt.sign(
-    { userId: this._id, name: this.name },
+    {
+      userId: this._id,
+      name: this.name,
+    },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_LIFETIME }
   );
 };
 
-UserSchema.methods.comparePassword = async function (candidatePassword) {
+FacultySchema.methods.comparePassword = async function (candidatePassword) {
   const isMatch = await bcrypt.compare(candidatePassword, this.password);
   return isMatch;
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("Faculty", FacultySchema);
