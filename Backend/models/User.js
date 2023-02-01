@@ -45,6 +45,10 @@ const UserSchema = new mongoose.Schema({
     ref: "Year",
     required: [true, "Please provide current year"],
   },
+  otp: {
+    type: Number,
+    default: 0,
+  },
 });
 
 UserSchema.pre("save", async function () {
